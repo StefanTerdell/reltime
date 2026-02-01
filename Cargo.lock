@@ -329,6 +329,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "reltime"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "derive_more",
+ "schemars",
+ "serde",
+]
+
+[[package]]
+name = "reltime-cli"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "reltime",
+ "schemars",
+ "serde_json",
+]
+
+[[package]]
 name = "rustc_version"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -450,27 +471,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "time"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "derive_more",
- "schemars",
- "serde",
-]
-
-[[package]]
-name = "time-cli"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "schemars",
- "serde_json",
- "time",
 ]
 
 [[package]]

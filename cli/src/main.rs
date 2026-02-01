@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use clap::{Args, Parser};
+use reltime::{Time, exact::ExactTime, month::Month, relative::Relative, weekday::Weekday};
 use schemars::schema_for;
-use time::{Time, exact::ExactTime, month::Month, relative::Relative, weekday::Weekday};
 
 #[derive(Debug, Clone, Parser)]
 pub enum Value {

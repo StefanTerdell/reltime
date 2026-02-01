@@ -229,8 +229,13 @@ impl Weekday {
     pub fn to_chrono_max(self, relative_to: DateTime<Utc>, skip_self: bool) -> DateTime<Utc> {
         let current_weekday = relative_to.weekday().number_from_monday();
         let target_weekday = self.to_chrono().number_from_monday();
-        let difference = current_weekday as i8 - target_weekday as i8;
-        let non_negative = (if difference < 0 { 7 } else { difference }) as u8;
+        let difference = target_weekday as i8 - current_weekday as i8;
+        let non_negative = (if difference < 0 {
+            7 + difference
+        } else {
+            difference
+        }) as u8;
+
         let skipped = if non_negative == 0 && skip_self {
             7
         } else {

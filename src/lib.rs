@@ -82,16 +82,6 @@ impl Time {
                 return Time::Relative(tomorrow);
             }
 
-            let this_week = Relative::ThisWeek(ThisWeek::from_language(language));
-            if date_time == this_week.clone().to_chrono_max(now) {
-                return Time::Relative(this_week);
-            }
-
-            let this_month = Relative::ThisMonth(ThisMonth::from_language(language));
-            if date_time == this_month.clone().to_chrono_max(now) {
-                return Time::Relative(this_month);
-            }
-
             let monday = Time::Weekday(Weekday::Monday(Monday::from_language(language)));
             if date_time == monday.clone().to_chrono_max(now) {
                 return monday;
@@ -185,6 +175,16 @@ impl Time {
             let december = Time::Month(Month::December(December::from_language(language)));
             if date_time == december.clone().to_chrono_max(now) {
                 return december;
+            }
+
+            let this_week = Relative::ThisWeek(ThisWeek::from_language(language));
+            if date_time == this_week.clone().to_chrono_max(now) {
+                return Time::Relative(this_week);
+            }
+
+            let this_month = Relative::ThisMonth(ThisMonth::from_language(language));
+            if date_time == this_month.clone().to_chrono_max(now) {
+                return Time::Relative(this_month);
             }
         }
 
@@ -351,13 +351,20 @@ mod tests {
     fn midnight_next_monday_means_sunday() {
         let tuesday = base_time();
 
+        dbg!(&tuesday);
         let midnight_next_monday = tuesday
             .checked_add_days(Days::new(6))
             .unwrap()
             .with_time(NaiveTime::MIN)
             .unwrap();
 
-        assert_eq!(midnight_next_monday.weekday(), chrono::Weekday::Mon,);
+        dbg!(&midnight_next_monday);
+
+        assert_eq!(
+            midnight_next_monday.weekday(),
+            chrono::Weekday::Mon,
+            "chrono monday check"
+        );
 
         let time = Time::from_max_chrono(midnight_next_monday, Some(tuesday), Language::default());
 

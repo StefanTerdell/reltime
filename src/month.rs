@@ -343,8 +343,12 @@ impl Month {
         let current_month = relative_to.month();
         let target_month = self.to_chrono().number_from_month();
 
-        let difference = current_month as i8 - target_month as i8;
-        let non_negative = (if difference < 0 { 12 } else { difference }) as u8;
+        let difference = target_month as i8 - current_month as i8;
+        let non_negative = (if difference < 0 {
+            12 + difference
+        } else {
+            difference
+        }) as u8;
         let skipped = if non_negative == 0 && skip_self {
             12
         } else {
