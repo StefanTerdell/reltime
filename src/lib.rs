@@ -45,8 +45,8 @@ impl Time {
                 .to_chrono_max(relative_to, true)
                 .checked_sub_months(Months::new(1))
                 .unwrap(),
-            Time::Exact(exact) => exact.to_chrono().max(relative_to),
-            Time::DateTime(date_time) => date_time.max(relative_to),
+            Time::Exact(exact) => exact.to_chrono_min(relative_to),
+            Time::DateTime(date_time) => date_time,
         }
     }
 
@@ -59,7 +59,7 @@ impl Time {
             Time::Relative(relative) => relative.to_chrono_max(relative_to),
             Time::Weekday(weekday) => weekday.to_chrono_max(relative_to, true),
             Time::Month(month) => month.to_chrono_max(relative_to, true),
-            Time::Exact(exact) => exact.to_chrono(),
+            Time::Exact(exact) => exact.to_chrono_max(relative_to),
             Time::DateTime(date_time) => date_time,
         }
     }

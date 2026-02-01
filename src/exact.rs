@@ -129,44 +129,80 @@ impl ExactSecond {
     }
 }
 
-#[derive(
-    Debug, Default, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display,
-)]
-#[display("{}-{}-{}", self.0, self.1, self.2)]
-pub struct ExactDate(ExactYear, ExactMonth, ExactDay);
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+pub enum ExactDate {
+    WithYear(ExactYear, ExactMonth, ExactDay),
+    WithoutYear(ExactMonth, ExactDay),
+}
+
+impl Display for ExactDate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ExactDate::WithYear(y, m, d) => f.write_fmt(format_args!("{d}/{m}/{y}")),
+            ExactDate::WithoutYear(m, d) => f.write_fmt(format_args!("{d}/{m}")),
+        }
+    }
+}
 
 impl ExactDate {
     pub fn validate(self) -> Result<Self, Self> {
-        match (self.0, self.1.validate(), self.2.validate()) {
-            (y, Ok(m), Ok(d)) => Ok(Self(y, m, d)),
-            (y, Ok(m), Err(d)) | (y, Err(m), Ok(d)) | (y, Err(m), Err(d)) => Err(Self(y, m, d)),
+        match self {
+            ExactDate::WithYear(y, m, d) => match (y, m.validate(), d.validate()) {
+                (y, Ok(m), Ok(d)) => Ok(Self::WithYear(y, m, d)),
+                (y, Ok(m), Err(d)) | (y, Err(m), Ok(d)) | (y, Err(m), Err(d)) => {
+                    Err(Self::WithYear(y, m, d))
+                }
+            },
+            ExactDate::WithoutYear(m, d) => match (m.validate(), d.validate()) {
+                (Ok(m), Ok(d)) => Ok(Self::WithoutYear(m, d)),
+                (Ok(m), Err(d)) | (Err(m), Ok(d)) | (Err(m), Err(d)) => {
+                    Err(Self::WithoutYear(m, d))
+                }
+            },
         }
     }
 
-    pub fn year(&self) -> i16 {
-        self.0.0
-    }
-    pub fn month(&self) -> u8 {
-        self.1.0
-    }
-    pub fn day(&self) -> u8 {
-        self.2.0
-    }
-
     pub fn from_chrono(x: NaiveDate) -> Self {
-        Self(
+        Self::WithYear(
             ExactYear(x.year() as i16),
             ExactMonth((x.month0() + 1) as u8),
             ExactDay((x.day0() + 1) as u8),
         )
     }
-    pub fn to_chrono(&self) -> NaiveDate {
-        NaiveDate::from_ymd_opt(self.0.0.into(), self.1.0.into(), self.2.0.into())
-            .unwrap_or_default()
+    pub fn to_chrono_min(&self, relative_to: DateTime<Utc>) -> NaiveDate {
+        let (year, month, day) = match self {
+            ExactDate::WithYear(y, m, d) => (y.0 as i32, m.0, d.0),
+            ExactDate::WithoutYear(m, d) => (relative_to.year(), m.0, d.0),
+        };
+
+        NaiveDate::from_ymd_opt(year, month.into(), day.into()).unwrap_or_default()
+    }
+    pub fn to_chrono_max(&self, relative_to: DateTime<Utc>) -> NaiveDate {
+        let (year, month, day) = match self {
+            ExactDate::WithYear(y, m, d) => (y.0 as i32, m.0, d.0),
+            ExactDate::WithoutYear(m, d) => {
+                let year = if relative_to.month() > m.0 as u32
+                    || (relative_to.month() == m.0 as u32 && relative_to.day() > d.0 as u32)
+                {
+                    relative_to.year() + 1
+                } else {
+                    relative_to.year()
+                };
+
+                (year, m.0, d.0)
+            }
+        };
+
+        NaiveDate::from_ymd_opt(year, month.into(), day.into()).unwrap_or_default()
     }
 
-    pub fn new(year: i16, month: u8, day: u8) -> Self {
-        Self(ExactYear(year), ExactMonth(month), ExactDay(day)).validated()
+    pub fn new(year: Option<i16>, month: u8, day: u8) -> Self {
+        match year {
+            Some(year) => {
+                Self::WithYear(ExactYear(year), ExactMonth(month), ExactDay(day)).validated()
+            }
+            None => Self::WithoutYear(ExactMonth(month), ExactDay(day)).validated(),
+        }
     }
 
     pub fn validated(self) -> Self {
@@ -278,6 +314,10 @@ impl Display for ExactTime {
 pub struct ExactDateTime(ExactDate, ExactTime);
 
 impl ExactDateTime {
+    pub fn new(date: ExactDate, time: ExactTime) -> Self {
+        Self(date.validated(), time.validated())
+    }
+
     pub fn validate(self) -> Result<Self, Self> {
         match (self.0.validate(), self.1.validate()) {
             (Ok(m), Ok(d)) => Ok(Self(m, d)),
@@ -285,8 +325,12 @@ impl ExactDateTime {
         }
     }
 
-    pub fn to_chrono(self) -> DateTime<Utc> {
-        NaiveDateTime::new(self.0.to_chrono(), self.1.to_chrono()).and_utc()
+    pub fn to_chrono_min(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
+        NaiveDateTime::new(self.0.to_chrono_min(relative_to), self.1.to_chrono()).and_utc()
+    }
+
+    pub fn to_chrono_max(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
+        NaiveDateTime::new(self.0.to_chrono_max(relative_to), self.1.to_chrono()).and_utc()
     }
 
     pub fn validated(self) -> Self {

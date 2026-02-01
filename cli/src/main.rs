@@ -1,13 +1,34 @@
 use chrono::{DateTime, Utc};
 use clap::{Args, Parser};
-use reltime::{Time, exact::ExactTime, month::Month, relative::Relative, weekday::Weekday};
+use reltime::{
+    Time,
+    exact::{ExactDate, ExactDateTime, ExactTime},
+    month::Month,
+    relative::Relative,
+    weekday::Weekday,
+};
 use schemars::schema_for;
 
 #[derive(Debug, Clone, Parser)]
 pub enum Value {
     Now,
     Today,
+    Date {
+        #[clap(long)]
+        year: Option<i16>,
+        month: u8,
+        day: u8,
+    },
     Time {
+        hour: u8,
+        minute: u8,
+        second: Option<u8>,
+    },
+    DateTime {
+        #[clap(long)]
+        year: Option<i16>,
+        month: u8,
+        day: u8,
         hour: u8,
         minute: u8,
         second: Option<u8>,
@@ -45,11 +66,25 @@ impl TryFrom<Value> for Time {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         Ok(match value {
             Value::Now => Self::DateTime(Utc::now()),
+            Value::Date { year, month, day } => {
+                Self::Relative(Relative::Date(ExactDate::new(year, month, day)))
+            }
             Value::Time {
                 hour,
                 minute,
                 second,
             } => Self::Relative(Relative::Time(ExactTime::new(hour, minute, second))),
+            Value::DateTime {
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+            } => Self::Relative(Relative::DateTime(ExactDateTime::new(
+                ExactDate::new(year, month, day),
+                ExactTime::new(hour, minute, second),
+            ))),
             Value::Today => Self::Relative(Relative::today()),
             Value::Tomorrow => Self::Relative(Relative::tomorrow()),
             Value::ThisWeek => Self::Relative(Relative::this_week()),

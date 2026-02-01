@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    exact::ExactTime,
+    exact::{ExactDate, ExactDateTime, ExactTime},
     language::Language,
     month::Month,
     traits::WithLanguage,
@@ -95,6 +95,8 @@ impl WithLanguage for ThisMonth {
 #[serde(untagged)]
 pub enum Relative {
     Time(ExactTime),
+    Date(ExactDate),
+    DateTime(ExactDateTime),
     Today(Today),
     Tomorrow(Tomorrow),
     ThisWeek(ThisWeek),
@@ -106,6 +108,8 @@ impl WithLanguage for Relative {
     fn with_language(&self, language: Language) -> Self {
         match self {
             Relative::Time(x) => Relative::Time(*x),
+            Relative::Date(x) => Relative::Date(*x),
+            Relative::DateTime(x) => Relative::DateTime(*x),
             Relative::Today(x) => Relative::Today(x.with_language(language)),
             Relative::Tomorrow(x) => Relative::Tomorrow(x.with_language(language)),
             Relative::ThisWeek(x) => Relative::ThisWeek(x.with_language(language)),
@@ -139,6 +143,11 @@ impl Relative {
     pub fn to_chrono_min(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
             Relative::Time(x) => relative_to.with_time(x.to_chrono()).unwrap(),
+            Relative::Date(x) => x
+                .to_chrono_min(relative_to)
+                .and_time(NaiveTime::MIN)
+                .and_utc(),
+            Relative::DateTime(x) => x.to_chrono_min(relative_to),
             Relative::Today(_) => relative_to.with_time(NaiveTime::MIN).unwrap(),
             Relative::Tomorrow(_) => relative_to
                 .checked_add_days(Days::new(1))
@@ -177,6 +186,11 @@ impl Relative {
                     relative_to.with_time(x).unwrap()
                 }
             }
+            Relative::Date(x) => x
+                .to_chrono_max(relative_to)
+                .and_time(NaiveTime::MIN)
+                .and_utc(),
+            Relative::DateTime(x) => x.to_chrono_max(relative_to),
             Relative::Today(_) => relative_to
                 .checked_add_days(Days::new(1))
                 .unwrap()
