@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::WithLanguage;
 
+#[cfg(feature = "swedish")]
 #[derive(
     Debug, Default, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display,
 )]
@@ -13,6 +14,7 @@ pub enum Swedish {
     Svenska,
 }
 
+#[cfg(feature = "swedish")]
 impl WithLanguage for Swedish {
     fn with_language(&self, language: Language) -> Self {
         match language {
@@ -28,12 +30,14 @@ impl WithLanguage for Swedish {
 pub enum English {
     #[default]
     English,
+    #[cfg(feature = "swedish")]
     Engelska,
 }
 
 impl WithLanguage for English {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Engelska,
             Language::English(_) => Self::English,
         }
@@ -44,6 +48,7 @@ impl WithLanguage for English {
 #[serde(untagged)]
 pub enum Language {
     English(English),
+    #[cfg(feature = "swedish")]
     Swedish(Swedish),
 }
 

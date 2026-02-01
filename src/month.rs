@@ -14,12 +14,14 @@ use crate::{
 pub enum January {
     #[default]
     January,
+    #[cfg(feature = "swedish")]
     Januari,
 }
 
 impl WithLanguage for January {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Januari,
             Language::English(_) => Self::January,
         }
@@ -32,12 +34,14 @@ impl WithLanguage for January {
 pub enum February {
     #[default]
     February,
+    #[cfg(feature = "swedish")]
     Februari,
 }
 
 impl WithLanguage for February {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Februari,
             Language::English(_) => Self::February,
         }
@@ -50,12 +54,14 @@ impl WithLanguage for February {
 pub enum March {
     #[default]
     March,
+    #[cfg(feature = "swedish")]
     Mars,
 }
 
 impl WithLanguage for March {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Mars,
             Language::English(_) => Self::March,
         }
@@ -73,6 +79,7 @@ pub enum April {
 impl WithLanguage for April {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::April,
             Language::English(_) => Self::April,
         }
@@ -85,12 +92,14 @@ impl WithLanguage for April {
 pub enum May {
     #[default]
     May,
+    #[cfg(feature = "swedish")]
     Maj,
 }
 
 impl WithLanguage for May {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Maj,
             Language::English(_) => Self::May,
         }
@@ -103,12 +112,14 @@ impl WithLanguage for May {
 pub enum June {
     #[default]
     June,
+    #[cfg(feature = "swedish")]
     Juni,
 }
 
 impl WithLanguage for June {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Juni,
             Language::English(_) => Self::June,
         }
@@ -121,13 +132,15 @@ impl WithLanguage for June {
 pub enum July {
     #[default]
     July,
+    #[cfg(feature = "swedish")]
     Juli,
 }
 impl WithLanguage for July {
     fn with_language(&self, language: Language) -> Self {
         match language {
-            Language::Swedish(_) => Self::July,
-            Language::English(_) => Self::Juli,
+            #[cfg(feature = "swedish")]
+            Language::Swedish(_) => Self::Juli,
+            Language::English(_) => Self::July,
         }
     }
 }
@@ -138,11 +151,13 @@ impl WithLanguage for July {
 pub enum August {
     #[default]
     August,
+    #[cfg(feature = "swedish")]
     Augusti,
 }
 impl WithLanguage for August {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Augusti,
             Language::English(_) => Self::August,
         }
@@ -159,6 +174,7 @@ pub enum September {
 impl WithLanguage for September {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::September,
             Language::English(_) => Self::September,
         }
@@ -171,12 +187,14 @@ impl WithLanguage for September {
 pub enum October {
     #[default]
     October,
+    #[cfg(feature = "swedish")]
     Oktober,
 }
 
 impl WithLanguage for October {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Oktober,
             Language::English(_) => Self::October,
         }
@@ -194,6 +212,7 @@ pub enum November {
 impl WithLanguage for November {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::November,
             Language::English(_) => Self::November,
         }
@@ -211,6 +230,7 @@ pub enum December {
 impl WithLanguage for December {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::December,
             Language::English(_) => Self::December,
         }

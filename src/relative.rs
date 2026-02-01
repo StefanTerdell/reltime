@@ -15,12 +15,14 @@ use crate::{
 pub enum Today {
     #[default]
     Today,
+    #[cfg(feature = "swedish")]
     Idag,
 }
 
 impl WithLanguage for Today {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Idag,
             Language::English(_) => Self::Today,
         }
@@ -31,12 +33,14 @@ impl WithLanguage for Today {
 pub enum Tomorrow {
     #[default]
     Tomorrow,
+    #[cfg(feature = "swedish")]
     Imorgon,
 }
 
 impl WithLanguage for Tomorrow {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Imorgon,
             Language::English(_) => Self::Tomorrow,
         }
@@ -47,12 +51,14 @@ impl WithLanguage for Tomorrow {
 pub enum ThisWeek {
     #[default]
     ThisWeek,
+    #[cfg(feature = "swedish")]
     DennaVecka,
 }
 
 impl WithLanguage for ThisWeek {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::DennaVecka,
             Language::English(_) => Self::ThisWeek,
         }
@@ -63,12 +69,14 @@ impl WithLanguage for ThisWeek {
 pub enum NextWeek {
     #[default]
     NextWeek,
+    #[cfg(feature = "swedish")]
     NästaVecka,
 }
 
 impl WithLanguage for NextWeek {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::NästaVecka,
             Language::English(_) => Self::NextWeek,
         }
@@ -79,12 +87,14 @@ impl WithLanguage for NextWeek {
 pub enum ThisMonth {
     #[default]
     ThisMonth,
+    #[cfg(feature = "swedish")]
     DennaMånad,
 }
 
 impl WithLanguage for ThisMonth {
     fn with_language(&self, language: Language) -> Self {
         match language {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::DennaMånad,
             Language::English(_) => Self::ThisMonth,
         }

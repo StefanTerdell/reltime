@@ -3,6 +3,10 @@ name = "reltime"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["swedish"]
+swedish = []
+
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
 derive_more = { version = "2", features = ["display"] }

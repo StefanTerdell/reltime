@@ -14,12 +14,14 @@ use crate::{
 pub enum Monday {
     #[default]
     Monday,
+    #[cfg(feature = "swedish")]
     Måndag,
 }
 
 impl WithLanguage for Monday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Måndag,
             Language::English(_) => Self::Monday,
         }
@@ -32,12 +34,14 @@ impl WithLanguage for Monday {
 pub enum Tuesday {
     #[default]
     Tuesday,
+    #[cfg(feature = "swedish")]
     Tisdag,
 }
 
 impl WithLanguage for Tuesday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Tisdag,
             Language::English(_) => Self::Tuesday,
         }
@@ -50,12 +54,14 @@ impl WithLanguage for Tuesday {
 pub enum Wednesday {
     #[default]
     Wednesday,
+    #[cfg(feature = "swedish")]
     Onsdag,
 }
 
 impl WithLanguage for Wednesday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Onsdag,
             Language::English(_) => Self::Wednesday,
         }
@@ -68,12 +74,14 @@ impl WithLanguage for Wednesday {
 pub enum Thursday {
     #[default]
     Thursday,
+    #[cfg(feature = "swedish")]
     Torsdag,
 }
 
 impl WithLanguage for Thursday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Torsdag,
             Language::English(_) => Self::Thursday,
         }
@@ -86,12 +94,14 @@ impl WithLanguage for Thursday {
 pub enum Friday {
     #[default]
     Friday,
+    #[cfg(feature = "swedish")]
     Fredag,
 }
 
 impl WithLanguage for Friday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Fredag,
             Language::English(_) => Self::Friday,
         }
@@ -104,12 +114,14 @@ impl WithLanguage for Friday {
 pub enum Saturday {
     #[default]
     Saturday,
+    #[cfg(feature = "swedish")]
     Lördag,
 }
 
 impl WithLanguage for Saturday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Lördag,
             Language::English(_) => Self::Saturday,
         }
@@ -122,12 +134,14 @@ impl WithLanguage for Saturday {
 pub enum Sunday {
     #[default]
     Sunday,
+    #[cfg(feature = "swedish")]
     Söndag,
 }
 
 impl WithLanguage for Sunday {
     fn with_language(&self, langue: Language) -> Self {
         match langue {
+            #[cfg(feature = "swedish")]
             Language::Swedish(_) => Self::Söndag,
             Language::English(_) => Self::Sunday,
         }
