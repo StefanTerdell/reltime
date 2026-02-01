@@ -344,3 +344,201 @@ impl ExactDateTime {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::NaiveDate;
+
+    fn base_time() -> DateTime<Utc> {
+        DateTime::parse_from_rfc3339("2025-07-29T10:30:05-00:00")
+            .unwrap()
+            .to_utc()
+    }
+
+    #[test]
+    fn exact_date_validation() {
+        // Valid date
+        let date = ExactDate::new(Some(2025), 7, 29);
+        assert!(date.validate().is_ok());
+
+        // Invalid month (clamped)
+        let date = ExactDate::new(Some(2025), 13, 15);
+        let validated = date.validated();
+        assert_eq!(format!("{}", validated), "15/12/2025");
+
+        // Invalid day (clamped)
+        let date = ExactDate::new(Some(2025), 7, 35);
+        let validated = date.validated();
+        assert_eq!(format!("{}", validated), "31/7/2025");
+    }
+
+    #[test]
+    fn exact_time_validation() {
+        // Valid time
+        let time = ExactTime::new(14, 30, Some(45));
+        assert!(time.validate().is_ok());
+
+        // Invalid hour (clamped)
+        let time = ExactTime::new(25, 30, None);
+        let validated = time.validated();
+        assert_eq!(format!("{}", validated), "23:30");
+
+        // Invalid minute (clamped)
+        let time = ExactTime::new(14, 65, None);
+        let validated = time.validated();
+        assert_eq!(format!("{}", validated), "14:59");
+    }
+
+    #[test]
+    fn exact_date_without_year_min() {
+        let base = base_time(); // July 29th, 2025
+
+        // Date in the past this year
+        let march_15 = ExactDate::new(None, 3, 15);
+        let chrono_min = march_15.to_chrono_min(base);
+
+        // Should use current year even though it's in the past
+        assert_eq!(chrono_min, NaiveDate::from_ymd_opt(2025, 3, 15).unwrap());
+    }
+
+    #[test]
+    fn exact_date_without_year_max() {
+        let base = base_time(); // July 29th, 2025
+
+        // Date in the past this year
+        let march_15 = ExactDate::new(None, 3, 15);
+        let chrono_max = march_15.to_chrono_max(base);
+
+        // Should use next year since we've already passed it
+        assert_eq!(chrono_max, NaiveDate::from_ymd_opt(2026, 3, 15).unwrap());
+
+        // Date in the future this year
+        let december_25 = ExactDate::new(None, 12, 25);
+        let chrono_max = december_25.to_chrono_max(base);
+
+        // Should use current year
+        assert_eq!(chrono_max, NaiveDate::from_ymd_opt(2025, 12, 25).unwrap());
+    }
+
+    #[test]
+    fn exact_date_with_year() {
+        let base = base_time();
+
+        let date = ExactDate::new(Some(2026), 3, 15);
+
+        let chrono_min = date.to_chrono_min(base);
+        assert_eq!(chrono_min, NaiveDate::from_ymd_opt(2026, 3, 15).unwrap());
+
+        let chrono_max = date.to_chrono_max(base);
+        assert_eq!(chrono_max, NaiveDate::from_ymd_opt(2026, 3, 15).unwrap());
+    }
+
+    #[test]
+    fn exact_time_accessors() {
+        let time = ExactTime::new(14, 30, Some(45));
+        assert_eq!(time.hour(), 14);
+        assert_eq!(time.minute(), 30);
+        assert_eq!(time.second(), 45);
+
+        let time_no_seconds = ExactTime::new(14, 30, None);
+        assert_eq!(time_no_seconds.hour(), 14);
+        assert_eq!(time_no_seconds.minute(), 30);
+        assert_eq!(time_no_seconds.second(), 0);
+    }
+
+    #[test]
+    fn exact_datetime_conversion() {
+        let base = base_time();
+
+        let date = ExactDate::new(Some(2025), 12, 25);
+        let time = ExactTime::new(18, 30, None);
+        let datetime = ExactDateTime::new(date, time);
+
+        let chrono = datetime.to_chrono_min(base);
+        assert_eq!(chrono.year(), 2025);
+        assert_eq!(chrono.month(), 12);
+        assert_eq!(chrono.day(), 25);
+        assert_eq!(chrono.hour(), 18);
+        assert_eq!(chrono.minute(), 30);
+    }
+
+    #[test]
+    fn exact_date_roundtrip() {
+        let original = NaiveDate::from_ymd_opt(2025, 7, 29).unwrap();
+        let exact = ExactDate::from_chrono(original);
+        let base = base_time();
+        let converted = exact.to_chrono_min(base);
+        assert_eq!(original, converted);
+    }
+
+    #[test]
+    fn exact_time_roundtrip() {
+        let original = NaiveTime::from_hms_opt(14, 30, 45).unwrap();
+        let exact = ExactTime::from_chrono(original);
+        let converted = exact.to_chrono();
+        assert_eq!(original, converted);
+    }
+
+    #[test]
+    fn exact_date_year_boundary() {
+        // Test date without year at year boundary
+        let dec_31 = DateTime::parse_from_rfc3339("2025-12-31T23:59:59-00:00")
+            .unwrap()
+            .to_utc();
+
+        // Jan 1 should be next year for max
+        let jan_1 = ExactDate::new(None, 1, 1);
+        let max = jan_1.to_chrono_max(dec_31);
+        assert_eq!(max.year(), 2026);
+
+        // Dec 31 should be this year for max (same day)
+        let dec_31_date = ExactDate::new(None, 12, 31);
+        let max = dec_31_date.to_chrono_max(dec_31);
+        assert_eq!(max.year(), 2025);
+    }
+
+    #[test]
+    fn exact_date_same_day() {
+        let base = base_time(); // July 29th, 2025
+
+        // Same date without year
+        let july_29 = ExactDate::new(None, 7, 29);
+
+        // Min should be this year
+        let min = july_29.to_chrono_min(base);
+        assert_eq!(min.year(), 2025);
+
+        // Max should be this year (we haven't passed the entire day yet)
+        let max = july_29.to_chrono_max(base);
+        assert_eq!(max.year(), 2025);
+    }
+
+    #[test]
+    fn exact_date_next_day() {
+        let base = base_time(); // July 29th, 2025 at 10:30:05
+
+        // Tomorrow's date without year
+        let july_30 = ExactDate::new(None, 7, 30);
+
+        // Max should still be this year (we haven't reached July 30 yet)
+        let max = july_30.to_chrono_max(base);
+        assert_eq!(max.year(), 2025);
+        assert_eq!(max.month(), 7);
+        assert_eq!(max.day(), 30);
+    }
+
+    #[test]
+    fn exact_date_february_29_non_leap() {
+        // Test Feb 29 in a non-leap year - should return default (epoch)
+        let base = DateTime::parse_from_rfc3339("2025-03-01T00:00:00-00:00")
+            .unwrap()
+            .to_utc();
+
+        let feb_29 = ExactDate::new(Some(2025), 2, 29);
+        let result = feb_29.to_chrono_min(base);
+
+        // from_ymd_opt returns None for invalid dates, unwrap_or_default gives epoch
+        assert_eq!(result, NaiveDate::default());
+    }
+}

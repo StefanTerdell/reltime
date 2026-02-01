@@ -220,7 +220,7 @@ mod tests {
 
     use super::*;
 
-    /// Creates a DateTime\<Utc> for Tueday July 29th, 2025 at 10:30:05.
+    /// Creates a DateTime\<Utc> for Tuesday July 29th, 2025 at 10:30:05.
     fn base_time() -> DateTime<Utc> {
         DateTime::parse_from_rfc3339("2025-07-29T10:30:05-00:00")
             .unwrap()
@@ -396,5 +396,226 @@ mod tests {
         );
 
         assert_eq!(time, Time::Weekday(Weekday::sunday()));
+    }
+
+    #[test]
+    fn month_conversions() {
+        let tuesday = base_time(); // July 29th, 2025
+
+        let july = Month::from_chrono(tuesday, false, Language::default());
+        assert_eq!(july, Month::july());
+
+        // Next occurrence of July should be midnight on August 1st
+        let next_july = july.to_chrono_max(tuesday, false);
+        assert_eq!(next_july.month(), 8);
+        assert_eq!(next_july.day(), 1);
+    }
+
+    #[test]
+    fn month_skipping_self() {
+        let tuesday = base_time(); // July 29th, 2025
+
+        let july = Month::july();
+
+        // Skipping self should give us next year's July
+        let next_july = july.to_chrono_max(tuesday, true);
+        assert_eq!(next_july.year(), 2026);
+        assert_eq!(next_july.month(), 8);
+        assert_eq!(next_july.day(), 1);
+    }
+
+    #[test]
+    fn relative_today_conversion() {
+        let tuesday = base_time();
+
+        let today = Relative::today();
+
+        // Min should be start of today
+        let min = today.clone().to_chrono_min(tuesday);
+        assert_eq!(min.date_naive(), tuesday.date_naive());
+        assert_eq!(min.time(), NaiveTime::MIN);
+
+        // Max should be start of tomorrow
+        let max = today.to_chrono_max(tuesday);
+        assert_eq!(max, tuesday.checked_add_days(Days::new(1)).unwrap().with_time(NaiveTime::MIN).unwrap());
+    }
+
+    #[test]
+    fn relative_tomorrow_conversion() {
+        let tuesday = base_time();
+
+        let tomorrow = Relative::tomorrow();
+
+        // Min should be start of tomorrow
+        let min = tomorrow.clone().to_chrono_min(tuesday);
+        assert_eq!(min, tuesday.checked_add_days(Days::new(1)).unwrap().with_time(NaiveTime::MIN).unwrap());
+
+        // Max should be start of day after tomorrow
+        let max = tomorrow.to_chrono_max(tuesday);
+        assert_eq!(max, tuesday.checked_add_days(Days::new(2)).unwrap().with_time(NaiveTime::MIN).unwrap());
+    }
+
+    #[test]
+    #[cfg(feature = "swedish")]
+    fn language_switching_weekday() {
+        use crate::traits::WithLanguage;
+        use crate::language::{Language, Swedish};
+
+        let monday_english = Monday::default();
+        assert_eq!(format!("{}", monday_english), "Monday");
+
+        let monday_swedish = monday_english.with_language(Language::Swedish(Swedish::default()));
+        assert_eq!(format!("{}", monday_swedish), "Måndag");
+    }
+
+    #[test]
+    #[cfg(feature = "swedish")]
+    fn language_switching_month() {
+        use crate::traits::WithLanguage;
+        use crate::language::{Language, Swedish};
+
+        let january_english = January::default();
+        assert_eq!(format!("{}", january_english), "January");
+
+        let january_swedish = january_english.with_language(Language::Swedish(Swedish::default()));
+        assert_eq!(format!("{}", january_swedish), "Januari");
+    }
+
+    #[test]
+    #[cfg(feature = "swedish")]
+    fn language_switching_relative() {
+        use crate::traits::WithLanguage;
+        use crate::language::{Language, Swedish};
+
+        let today_english = Today::default();
+        assert_eq!(format!("{}", today_english), "Today");
+
+        let today_swedish = today_english.with_language(Language::Swedish(Swedish::default()));
+        assert_eq!(format!("{}", today_swedish), "Idag");
+    }
+
+    #[test]
+    fn this_week_conversion() {
+        let tuesday = base_time(); // July 29th, 2025
+
+        let this_week = Relative::this_week();
+
+        // This week should end on Sunday midnight (which is the next Monday)
+        let max = this_week.to_chrono_max(tuesday);
+
+        // Should be the upcoming Sunday at midnight (which shows as Monday)
+        assert_eq!(max.weekday(), chrono::Weekday::Mon);
+    }
+
+    #[test]
+    fn next_week_conversion() {
+        let tuesday = base_time();
+
+        let next_week = Relative::next_week();
+
+        // Next week should end a week after this week ends
+        let max = next_week.to_chrono_max(tuesday);
+
+        // Should be Monday, 7 days after the end of this week
+        assert_eq!(max.weekday(), chrono::Weekday::Mon);
+
+        let this_week_max = Relative::this_week().to_chrono_max(tuesday);
+        assert_eq!(max, this_week_max.checked_add_days(Days::new(7)).unwrap());
+    }
+
+    #[test]
+    fn this_month_conversion() {
+        let tuesday = base_time(); // July 29th, 2025
+
+        let this_month = Relative::this_month();
+
+        // This month should end at midnight on August 1st
+        let max = this_month.to_chrono_max(tuesday);
+        assert_eq!(max.month(), 8);
+        assert_eq!(max.day(), 1);
+        assert_eq!(max.year(), 2025);
+    }
+
+    #[test]
+    fn month_year_boundary() {
+        let dec_15 = DateTime::parse_from_rfc3339("2025-12-15T10:00:00-00:00")
+            .unwrap()
+            .to_utc();
+
+        // December should wrap to January next year
+        let december = Month::december();
+        let max = december.to_chrono_max(dec_15, false);
+
+        assert_eq!(max.year(), 2026);
+        assert_eq!(max.month(), 1);
+        assert_eq!(max.day(), 1);
+    }
+
+    #[test]
+    fn month_january_in_december() {
+        let dec_15 = DateTime::parse_from_rfc3339("2025-12-15T10:00:00-00:00")
+            .unwrap()
+            .to_utc();
+
+        // January should be next year when we're in December
+        let january = Month::january();
+        let max = january.to_chrono_max(dec_15, false);
+
+        assert_eq!(max.year(), 2026);
+        assert_eq!(max.month(), 2);
+        assert_eq!(max.day(), 1);
+    }
+
+    #[test]
+    fn weekday_year_boundary() {
+        // Test on December 31, 2025 (Wednesday)
+        let wed_dec_31 = DateTime::parse_from_rfc3339("2025-12-31T10:00:00-00:00")
+            .unwrap()
+            .to_utc();
+
+        // Monday should be next year
+        let monday = Weekday::monday();
+        let max = monday.to_chrono_max(wed_dec_31, false);
+
+        assert_eq!(max.year(), 2026);
+        assert_eq!(max.month(), 1);
+    }
+
+    #[test]
+    fn from_max_chrono_preserves_language() {
+        let tuesday = base_time();
+        let midnight_tomorrow = tuesday
+            .checked_add_days(Days::new(1))
+            .unwrap()
+            .with_time(NaiveTime::MIN)
+            .unwrap();
+
+        #[cfg(feature = "swedish")]
+        {
+            use crate::language::{Language, Swedish};
+
+            let time = Time::from_max_chrono(
+                midnight_tomorrow,
+                Some(tuesday),
+                Language::Swedish(Swedish::default()),
+            );
+
+            if let Time::Relative(Relative::Today(today)) = time {
+                assert_eq!(format!("{}", today), "Idag");
+            } else {
+                panic!("Expected Today variant");
+            }
+        }
+
+        #[cfg(not(feature = "swedish"))]
+        {
+            let time = Time::from_max_chrono(midnight_tomorrow, Some(tuesday), Language::default());
+
+            if let Time::Relative(Relative::Today(today)) = time {
+                assert_eq!(format!("{}", today), "Today");
+            } else {
+                panic!("Expected Today variant");
+            }
+        }
     }
 }
