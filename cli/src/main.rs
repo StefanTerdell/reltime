@@ -9,54 +9,97 @@ use reltime::{
 };
 use schemars::schema_for;
 
+/// Time value to convert
 #[derive(Debug, Clone, Parser)]
 pub enum Value {
+    /// Current timestamp
     Now,
+    /// Today (current day)
     Today,
+    /// Specific date (optionally without year for recurring dates)
     Date {
+        /// Year (optional for recurring dates)
         #[clap(long)]
         year: Option<i16>,
+        /// Month (1-12)
         month: u8,
+        /// Day (1-31)
         day: u8,
     },
+    /// Time of day
     Time {
+        /// Hour (0-23)
         hour: u8,
+        /// Minute (0-59)
         minute: u8,
+        /// Second (0-59, optional)
         second: Option<u8>,
     },
+    /// Specific date and time
     DateTime {
+        /// Year (optional for recurring dates)
         #[clap(long)]
         year: Option<i16>,
+        /// Month (1-12)
         month: u8,
+        /// Day (1-31)
         day: u8,
+        /// Hour (0-23)
         hour: u8,
+        /// Minute (0-59)
         minute: u8,
+        /// Second (0-59, optional)
         second: Option<u8>,
     },
+    /// Tomorrow
     Tomorrow,
+    /// This week (ending Sunday)
     ThisWeek,
+    /// Next week
     NextWeek,
+    /// This month
     ThisMonth,
+    /// Monday
     Monday,
+    /// Tuesday
     Tuesday,
+    /// Wednesday
     Wednesday,
+    /// Thursday
     Thursday,
+    /// Friday
     Friday,
+    /// Saturday
     Saturday,
+    /// Sunday
     Sunday,
+    /// January
     January,
+    /// February
     February,
+    /// March
     March,
+    /// April
     April,
+    /// May
     May,
+    /// June
     June,
+    /// July
     July,
+    /// August
     August,
+    /// September
     September,
+    /// October
     October,
+    /// November
     November,
+    /// December
     December,
+    /// Parse a JSON value directly
     Parse {
+        /// JSON string value to parse
         value: String,
     },
 }
@@ -115,8 +158,10 @@ impl TryFrom<Value> for Time {
     }
 }
 
+/// Arguments for time conversion commands
 #[derive(Debug, Clone, Args)]
 pub struct TimeArgs {
+    /// Reference timestamp for relative calculations (defaults to current time)
     #[clap(long, short)]
     relative_to: Option<DateTime<Utc>>,
     #[command(subcommand)]
@@ -125,8 +170,11 @@ pub struct TimeArgs {
 
 #[derive(Debug, Clone, Parser)]
 pub enum Cli {
+    /// Convert to earliest possible timestamp
     Min(TimeArgs),
+    /// Convert to latest possible timestamp
     Max(TimeArgs),
+    /// Generate JSON Schema for Time type
     Schema,
 }
 
