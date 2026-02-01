@@ -2,6 +2,9 @@
 name = "reltime"
 version = "0.1.0"
 edition = "2024"
+description = "Relative time representations with language support"
+license = "MIT"
+repository = "https://github.com/stefanterdell/reltime"
 
 [features]
 default = ["swedish"]

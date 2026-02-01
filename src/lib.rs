@@ -1,3 +1,13 @@
+//! Relative time representations with language support.
+//!
+//! This library provides types for expressing dates and times in human-readable forms,
+//! supporting both absolute and relative representations. All types serialise to and from
+//! JSON in a natural format.
+//!
+//! # Features
+//!
+//! - `swedish` (default): Enables Swedish language variants for all time types.
+
 use chrono::{DateTime, Months, NaiveTime, Utc};
 use derive_more::Display;
 use schemars::JsonSchema;
@@ -22,6 +32,10 @@ pub mod relative;
 pub mod traits;
 pub mod weekday;
 
+/// A time representation supporting relative, named, exact, and absolute forms.
+///
+/// Serialises as an untagged enum, allowing natural JSON representations like
+/// `"Today"`, `"Monday"`, `"2025-07-29T10:30:05Z"`, etc.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum Time {
@@ -33,10 +47,12 @@ pub enum Time {
 }
 
 impl Time {
+    /// Converts to the earliest possible timestamp, relative to the current time.
     pub fn to_chrono_min_now(self) -> DateTime<Utc> {
         self.to_chrono_min(Utc::now())
     }
 
+    /// Converts to the earliest possible timestamp, relative to the given time.
     pub fn to_chrono_min(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
             Time::Relative(relative) => relative.to_chrono_min(relative_to),
@@ -50,10 +66,12 @@ impl Time {
         }
     }
 
+    /// Converts to the latest possible timestamp, relative to the current time.
     pub fn to_chrono_max_now(self) -> DateTime<Utc> {
         self.to_chrono_max(Utc::now())
     }
 
+    /// Converts to the latest possible timestamp, relative to the given time.
     pub fn to_chrono_max(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
             Time::Relative(relative) => relative.to_chrono_max(relative_to),
@@ -64,6 +82,10 @@ impl Time {
         }
     }
 
+    /// Converts a chrono timestamp to the most natural time representation.
+    ///
+    /// When `relative_to` is provided, attempts to express the timestamp as a relative
+    /// or named time (e.g., "Today", "Monday") in the specified language.
     pub fn from_max_chrono(
         date_time: DateTime<Utc>,
         relative_to: Option<DateTime<Utc>>,

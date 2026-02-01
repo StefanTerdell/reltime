@@ -1,3 +1,5 @@
+//! Weekday representations with language support.
+
 use chrono::{DateTime, Datelike, Days, NaiveTime, Utc};
 use derive_more::Display;
 use schemars::JsonSchema;
@@ -148,6 +150,7 @@ impl WithLanguage for Sunday {
     }
 }
 
+/// A weekday with language-specific representations.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum Weekday {
@@ -196,6 +199,7 @@ impl Weekday {
     pub fn sunday() -> Self {
         Self::Sunday(Sunday::default())
     }
+    /// Converts to a chrono weekday.
     pub fn to_chrono(self) -> chrono::Weekday {
         match self {
             Weekday::Monday(_) => chrono::Weekday::Mon,
@@ -208,6 +212,10 @@ impl Weekday {
         }
     }
 
+    /// Extracts the weekday from a timestamp in the specified language.
+    ///
+    /// When `midnight_means_day_before` is true, midnight timestamps are treated
+    /// as belonging to the previous day.
     pub fn from_chrono(
         date_time: DateTime<Utc>,
         midnight_means_day_before: bool,
@@ -233,6 +241,9 @@ impl Weekday {
         }
     }
 
+    /// Converts to the earliest timestamp for this weekday, relative to the given time.
+    ///
+    /// When `skip_self` is true, finds the next occurrence even if the current day matches.
     pub fn to_chrono_min(self, relative_to: DateTime<Utc>, skip_self: bool) -> DateTime<Utc> {
         self.to_chrono_max(relative_to, skip_self)
             .checked_sub_days(Days::new(1))
@@ -240,6 +251,9 @@ impl Weekday {
             .max(relative_to)
     }
 
+    /// Converts to midnight after this weekday, relative to the given time.
+    ///
+    /// When `skip_self` is true, finds the next occurrence even if the current day matches.
     pub fn to_chrono_max(self, relative_to: DateTime<Utc>, skip_self: bool) -> DateTime<Utc> {
         let current_weekday = relative_to.weekday().number_from_monday();
         let target_weekday = self.to_chrono().number_from_monday();

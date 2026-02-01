@@ -1,3 +1,5 @@
+//! Exact date and time types with validation.
+
 use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
 use derive_more::Display;
 use schemars::JsonSchema;
@@ -129,6 +131,7 @@ impl ExactSecond {
     }
 }
 
+/// A calendar date, optionally without a year for recurring dates.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
 pub enum ExactDate {
     WithYear(ExactYear, ExactMonth, ExactDay),
@@ -212,6 +215,7 @@ impl ExactDate {
     }
 }
 
+/// A time of day, optionally without seconds.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum ExactTime {
@@ -309,6 +313,7 @@ impl Display for ExactTime {
     }
 }
 
+/// A combination of date and time.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 #[display("{} {}", self.0, self.1)]
 pub struct ExactDateTime(ExactDate, ExactTime);

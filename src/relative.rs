@@ -1,3 +1,5 @@
+//! Relative time expressions with language support.
+
 use chrono::{DateTime, Days, Months, NaiveTime, Utc};
 use derive_more::Display;
 use schemars::JsonSchema;
@@ -101,6 +103,7 @@ impl WithLanguage for ThisMonth {
     }
 }
 
+/// A relative time expression, from exact times to rolling time windows.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum Relative {
@@ -146,10 +149,12 @@ impl Relative {
         Self::ThisMonth(ThisMonth::default())
     }
 
+    /// Converts to the earliest possible timestamp, relative to the current time.
     pub fn to_chrono_min_now(self) -> DateTime<Utc> {
         self.to_chrono_min(Utc::now())
     }
 
+    /// Converts to the earliest possible timestamp, relative to the given time.
     pub fn to_chrono_min(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
             Relative::Time(x) => relative_to.with_time(x.to_chrono()).unwrap(),
@@ -177,10 +182,12 @@ impl Relative {
         }
     }
 
+    /// Converts to the latest possible timestamp, relative to the current time.
     pub fn to_chrono_max_now(self) -> DateTime<Utc> {
         self.to_chrono_max(Utc::now())
     }
 
+    /// Converts to the latest possible timestamp, relative to the given time.
     pub fn to_chrono_max(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
             Relative::Time(x) => {

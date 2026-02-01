@@ -1,9 +1,12 @@
+//! Language variants for time representations.
+
 use derive_more::Display;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::traits::WithLanguage;
 
+/// Swedish language representation, in English or Swedish.
 #[cfg(feature = "swedish")]
 #[derive(
     Debug, Default, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display,
@@ -24,6 +27,7 @@ impl WithLanguage for Swedish {
     }
 }
 
+/// English language representation, in English or Swedish.
 #[derive(
     Debug, Default, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display,
 )]
@@ -44,6 +48,7 @@ impl WithLanguage for English {
     }
 }
 
+/// Language selection for time representations.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum Language {

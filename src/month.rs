@@ -1,3 +1,5 @@
+//! Month representations with language support.
+
 use chrono::{DateTime, Datelike, Months, NaiveTime, Utc};
 use derive_more::Display;
 use schemars::JsonSchema;
@@ -237,6 +239,7 @@ impl WithLanguage for December {
     }
 }
 
+/// A month with language-specific representations.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum Month {
@@ -310,6 +313,7 @@ impl Month {
     pub fn december() -> Self {
         Self::December(December::default())
     }
+    /// Converts to a chrono month.
     pub fn to_chrono(self) -> chrono::Month {
         match self {
             Month::January(_) => chrono::Month::January,
@@ -327,6 +331,10 @@ impl Month {
         }
     }
 
+    /// Extracts the month from a timestamp in the specified language.
+    ///
+    /// When `first_midnight_means_month_before` is true, midnight on the first of the month
+    /// is treated as belonging to the previous month.
     pub fn from_chrono(
         date_time: DateTime<Utc>,
         first_midnight_means_month_before: bool,
@@ -359,6 +367,9 @@ impl Month {
         }
     }
 
+    /// Converts to midnight on the first of the following month, relative to the given time.
+    ///
+    /// When `skip_self` is true, finds the next occurrence even if the current month matches.
     pub fn to_chrono_max(self, relative_to: DateTime<Utc>, skip_self: bool) -> DateTime<Utc> {
         let current_month = relative_to.month();
         let target_month = self.to_chrono().number_from_month();
