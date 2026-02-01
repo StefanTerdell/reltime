@@ -254,6 +254,42 @@ impl WithLanguage for Month {
 }
 
 impl Month {
+    pub fn january() -> Self {
+        Self::January(January::default())
+    }
+    pub fn february() -> Self {
+        Self::February(February::default())
+    }
+    pub fn march() -> Self {
+        Self::March(March::default())
+    }
+    pub fn april() -> Self {
+        Self::April(April::default())
+    }
+    pub fn may() -> Self {
+        Self::May(May::default())
+    }
+    pub fn june() -> Self {
+        Self::June(June::default())
+    }
+    pub fn july() -> Self {
+        Self::July(July::default())
+    }
+    pub fn august() -> Self {
+        Self::August(August::default())
+    }
+    pub fn september() -> Self {
+        Self::September(September::default())
+    }
+    pub fn october() -> Self {
+        Self::October(October::default())
+    }
+    pub fn november() -> Self {
+        Self::November(November::default())
+    }
+    pub fn december() -> Self {
+        Self::December(December::default())
+    }
     pub fn to_chrono(self) -> chrono::Month {
         match self {
             Month::January(_) => chrono::Month::January,
@@ -303,7 +339,7 @@ impl Month {
         }
     }
 
-    pub fn next_midnight(self, relative_to: DateTime<Utc>, skip_self: bool) -> DateTime<Utc> {
+    pub fn to_chrono_max(self, relative_to: DateTime<Utc>, skip_self: bool) -> DateTime<Utc> {
         let current_month = relative_to.month();
         let target_month = self.to_chrono().number_from_month();
 

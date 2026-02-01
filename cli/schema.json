@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Time",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Relative"
+    },
+    {
+      "$ref": "#/$defs/Weekday"
+    },
+    {
+      "$ref": "#/$defs/Month"
+    },
+    {
+      "type": "string",
+      "format": "date-time"
+    }
+  ],
+  "$defs": {
+    "April": {
+      "type": "string",
+      "enum": [
+        "April"
+      ]
+    },
+    "August": {
+      "type": "string",
+      "enum": [
+        "August",
+        "Augusti"
+      ]
+    },
+    "December": {
+      "type": "string",
+      "enum": [
+        "December"
+      ]
+    },
+    "February": {
+      "type": "string",
+      "enum": [
+        "February",
+        "Februari"
+      ]
+    },
+    "Friday": {
+      "type": "string",
+      "enum": [
+        "Friday",
+        "Fredag"
+      ]
+    },
+    "January": {
+      "type": "string",
+      "enum": [
+        "January",
+        "Januari"
+      ]
+    },
+    "July": {
+      "type": "string",
+      "enum": [
+        "July",
+        "Juli"
+      ]
+    },
+    "June": {
+      "type": "string",
+      "enum": [
+        "June",
+        "Juni"
+      ]
+    },
+    "March": {
+      "type": "string",
+      "enum": [
+        "March",
+        "Mars"
+      ]
+    },
+    "May": {
+      "type": "string",
+      "enum": [
+        "May",
+        "Maj"
+      ]
+    },
+    "Monday": {
+      "type": "string",
+      "enum": [
+        "Monday",
+        "Måndag"
+      ]
+    },
+    "Month": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/January"
+        },
+        {
+          "$ref": "#/$defs/February"
+        },
+        {
+          "$ref": "#/$defs/March"
+        },
+        {
+          "$ref": "#/$defs/April"
+        },
+        {
+          "$ref": "#/$defs/May"
+        },
+        {
+          "$ref": "#/$defs/June"
+        },
+        {
+          "$ref": "#/$defs/July"
+        },
+        {
+          "$ref": "#/$defs/August"
+        },
+        {
+          "$ref": "#/$defs/September"
+        },
+        {
+          "$ref": "#/$defs/October"
+        },
+        {
+          "$ref": "#/$defs/November"
+        },
+        {
+          "$ref": "#/$defs/December"
+        }
+      ]
+    },
+    "NextWeek": {
+      "type": "string",
+      "enum": [
+        "NextWeek",
+        "NästaVecka"
+      ]
+    },
+    "November": {
+      "type": "string",
+      "enum": [
+        "November"
+      ]
+    },
+    "October": {
+      "type": "string",
+      "enum": [
+        "October",
+        "Oktober"
+      ]
+    },
+    "Relative": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Today"
+        },
+        {
+          "$ref": "#/$defs/Tomorrow"
+        },
+        {
+          "$ref": "#/$defs/ThisWeek"
+        },
+        {
+          "$ref": "#/$defs/NextWeek"
+        },
+        {
+          "$ref": "#/$defs/ThisMonth"
+        }
+      ]
+    },
+    "Saturday": {
+      "type": "string",
+      "enum": [
+        "Saturday",
+        "Lördag"
+      ]
+    },
+    "September": {
+      "type": "string",
+      "enum": [
+        "September"
+      ]
+    },
+    "Sunday": {
+      "type": "string",
+      "enum": [
+        "Sunday",
+        "Söndag"
+      ]
+    },
+    "ThisMonth": {
+      "type": "string",
+      "enum": [
+        "ThisMonth",
+        "DennaMånad"
+      ]
+    },
+    "ThisWeek": {
+      "type": "string",
+      "enum": [
+        "ThisWeek",
+        "DennaVecka"
+      ]
+    },
+    "Thursday": {
+      "type": "string",
+      "enum": [
+        "Thursday",
+        "Torsdag"
+      ]
+    },
+    "Today": {
+      "type": "string",
+      "enum": [
+        "Today",
+        "Idag"
+      ]
+    },
+    "Tomorrow": {
+      "type": "string",
+      "enum": [
+        "Tomorrow",
+        "Imorgon"
+      ]
+    },
+    "Tuesday": {
+      "type": "string",
+      "enum": [
+        "Tuesday",
+        "Tisdag"
+      ]
+    },
+    "Wednesday": {
+      "type": "string",
+      "enum": [
+        "Wednesday",
+        "Onsdag"
+      ]
+    },
+    "Weekday": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Monday"
+        },
+        {
+          "$ref": "#/$defs/Tuesday"
+        },
+        {
+          "$ref": "#/$defs/Wednesday"
+        },
+        {
+          "$ref": "#/$defs/Thursday"
+        },
+        {
+          "$ref": "#/$defs/Friday"
+        },
+        {
+          "$ref": "#/$defs/Saturday"
+        },
+        {
+          "$ref": "#/$defs/Sunday"
+        }
+      ]
+    }
+  }
+}

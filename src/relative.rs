@@ -1,9 +1,10 @@
-use chrono::{DateTime, Days, NaiveTime, Utc};
+use chrono::{DateTime, Days, Months, NaiveTime, Utc};
 use derive_more::Display;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    exact::ExactTime,
     language::Language,
     month::Month,
     traits::WithLanguage,
@@ -59,6 +60,22 @@ impl WithLanguage for ThisWeek {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
+pub enum NextWeek {
+    #[default]
+    NextWeek,
+    NästaVecka,
+}
+
+impl WithLanguage for NextWeek {
+    fn with_language(&self, language: Language) -> Self {
+        match language {
+            Language::Swedish(_) => Self::NästaVecka,
+            Language::English(_) => Self::NextWeek,
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
 pub enum ThisMonth {
     #[default]
     ThisMonth,
@@ -75,19 +92,24 @@ impl WithLanguage for ThisMonth {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Display)]
+#[serde(untagged)]
 pub enum Relative {
+    Time(ExactTime),
     Today(Today),
     Tomorrow(Tomorrow),
     ThisWeek(ThisWeek),
+    NextWeek(NextWeek),
     ThisMonth(ThisMonth),
 }
 
 impl WithLanguage for Relative {
     fn with_language(&self, language: Language) -> Self {
         match self {
+            Relative::Time(x) => Relative::Time(*x),
             Relative::Today(x) => Relative::Today(x.with_language(language)),
             Relative::Tomorrow(x) => Relative::Tomorrow(x.with_language(language)),
             Relative::ThisWeek(x) => Relative::ThisWeek(x.with_language(language)),
+            Relative::NextWeek(x) => Relative::NextWeek(x.with_language(language)),
             Relative::ThisMonth(x) => Relative::ThisMonth(x.with_language(language)),
         }
     }
@@ -103,6 +125,9 @@ impl Relative {
     pub fn this_week() -> Self {
         Self::ThisWeek(ThisWeek::default())
     }
+    pub fn next_week() -> Self {
+        Self::NextWeek(NextWeek::default())
+    }
     pub fn this_month() -> Self {
         Self::ThisMonth(ThisMonth::default())
     }
@@ -113,14 +138,23 @@ impl Relative {
 
     pub fn to_chrono_min(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
-            Relative::Today(_) => relative_to,
+            Relative::Time(x) => relative_to.with_time(x.to_chrono()).unwrap(),
+            Relative::Today(_) => relative_to.with_time(NaiveTime::MIN).unwrap(),
             Relative::Tomorrow(_) => relative_to
                 .checked_add_days(Days::new(1))
                 .unwrap()
                 .with_time(NaiveTime::MIN)
                 .unwrap(),
-            Relative::ThisWeek(_) => relative_to,
-            Relative::ThisMonth(_) => relative_to,
+            Relative::ThisWeek(_) => Weekday::Sunday(Sunday::default())
+                .to_chrono_max(relative_to.checked_sub_days(Days::new(7)).unwrap(), false),
+            Relative::NextWeek(_) => {
+                Weekday::Sunday(Sunday::default()).to_chrono_max(relative_to, false)
+            }
+            Relative::ThisMonth(_) => Month::from_chrono(relative_to, false, Language::default())
+                .to_chrono_max(
+                    relative_to.checked_sub_months(Months::new(1)).unwrap(),
+                    false,
+                ),
         }
     }
 
@@ -130,6 +164,19 @@ impl Relative {
 
     pub fn to_chrono_max(self, relative_to: DateTime<Utc>) -> DateTime<Utc> {
         match self {
+            Relative::Time(x) => {
+                let x = x.to_chrono();
+
+                if x < relative_to.time() {
+                    relative_to
+                        .checked_add_days(Days::new(1))
+                        .unwrap()
+                        .with_time(x)
+                        .unwrap()
+                } else {
+                    relative_to.with_time(x).unwrap()
+                }
+            }
             Relative::Today(_) => relative_to
                 .checked_add_days(Days::new(1))
                 .unwrap()
@@ -143,8 +190,10 @@ impl Relative {
             Relative::ThisWeek(_) => {
                 Weekday::Sunday(Sunday::default()).to_chrono_max(relative_to, false)
             }
+            Relative::NextWeek(_) => Weekday::Sunday(Sunday::default())
+                .to_chrono_max(relative_to.checked_add_days(Days::new(7)).unwrap(), false),
             Relative::ThisMonth(_) => Month::from_chrono(relative_to, false, Language::default())
-                .next_midnight(relative_to, false),
+                .to_chrono_max(relative_to, false),
         }
     }
 }

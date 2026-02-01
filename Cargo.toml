@@ -8,3 +8,6 @@ chrono = { version = "0.4", features = ["serde"] }
 derive_more = { version = "2", features = ["display"] }
 schemars = { version = "1.2", features = ["chrono04"] }
 serde = { version = "1", features = ["derive"] }
+
+[workspace]
+members = ["cli"]
